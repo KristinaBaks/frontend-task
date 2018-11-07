@@ -1,0 +1,13 @@
+{
+    "name": "vikimedija-frontend-assignment",
+    "version": "1.0.0",
+    "description": "VikiMedija Front-End Assignment",
+    "main": "index.html",
+    "scripts": {
+        "start:api": "json-server --watch db.json"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "json-server": "^0.8.14"
+    }
+}

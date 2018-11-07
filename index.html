@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vikimedija - Frontend Assignment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.1.1/normalize.min.css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400,600,300,700">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,600,700,900" rel="stylesheet">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootswatch/3.2.0/sandstone/bootstrap.min.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body role="document">
+<div class="container">
+    <div class="page-header">
+        <h1>Assignment</h1>
+    </div>
+</div>
+<div class="container">
+    <div class="col-md-2 col-xs-12">
+        <button class="btn btn-md col-xs-12 menu-button callback-btn">Callback
+        </button>
+        <button class="btn btn-md  col-xs-12 menu-button promise-btn">Promise
+        </button>
+        <div class="row">
+            <div class="col-xs-12">
+            	<br/>
+                <select class="col-xs-12 menu-button method-selection" required>
+                    <option value="" disabled selected>Payment methods</option>  
+                	<option value="creditcard">creditcard</option>
+                	<option value="ideal">ideal</option>
+                	<option value="bank-transfer">bank-transfer</option>
+                </select>
+                <button class="btn btn-md col-xs-12 filter-btn menu-button">Filter Payment-Method (server)
+                </button>
+                <button class="btn btn-md col-xs-12 filter-client-btn menu-button">Filter Method (client)
+                </button>
+            </div>
+        </div>
+        <br/>
+        <button class="btn btn-md col-xs-12 menu-button add-btn" id="addPaymentBtn"
+                data-toggle="modal" data-target="#newPaymentModal">Add payment
+        </button>
+        <button class="btn btn-md col-xs-12 menu-button show-all btn-show-all">Show all
+        </button>
+    </div>
+    <div class="col-md-10 col-xs-12">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Method</th>
+                <th>Amount</th>
+                <th>Date created</th>
+                <th>Status</th>
+                <th>Merchant</th>
+            </tr>
+            </thead>
+            <tbody class="tbody">
+            <tr class="tr">
+                <td class="td-id">...</td>
+                <td class="td-method" id="td-method">...</td>
+                <td class="td-amount">...</td>
+                <td class="td-date">...</td>
+                <td class="td-status">...</td>
+                <td class="td-merchant">...</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalTitle" id="newPaymentModal"
+         bootstrap-modal>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="modalTitle">Add new payment</h4>
+                </div>
+                <div class="modal-body">
+                    <center><form name="form" role="form" id="paymentForm" action="http://localhost:3000/payments" method="POST">
+                        <select class="menu-button form-method-selection" name="form-method" required>
+                            <option value="" disabled selected>Payment methods</option>  
+                            <option id="method" value="creditcard">creditcard</option>
+                            <option value="ideal">ideal</option>
+                            <option value="bank-transfer">bank-transfer</option>
+                        </select> <br>
+                        <input type="number" name="form-amount" class="form-amount menu-button" required value="" placeholder="Amount"> <br>
+                        <select class="menu-button currency-selection" name="form-currency" required> <br>
+                            <option value="" disabled selected>Currency</option>  
+                            <option value="eur">EUR</option>
+                            <option value="usd">USD</option>
+                            <option value="aud">AUD</option>
+                            <option value="gbp">GBP</option>
+                        </select> <br>
+                        <input type="text" name="form-merchant" class="form-merchant menu-button" required value="" placeholder="Your Name"/> <br>
+                        <input class="btn form-btn" type="submit" value="SEND">
+                    </form></center>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="app.js" type="text/javascript"></script>
+</body>
+</html>
