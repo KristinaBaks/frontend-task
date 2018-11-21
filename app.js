@@ -5,100 +5,141 @@ document.querySelector('.filter-client-btn').addEventListener('click', filterMet
 document.getElementById('paymentForm').addEventListener('submit', sendForm);
 document.querySelector('.btn-show-all').addEventListener('click', showAllPayments);
 
+//---------------- CUSTOM AJAX W/ CALLBACKS LIBRARY -----------------
+
+function fromDB(url, methodType, callback) { // could be GET / DELETE
+    var xhr = new XMLHttpRequest();
+
+    xhr.open(methodType, url, true);
+
+    xhr.onload = function() {
+        if(xhr.status === 200) {
+            console.log(xhr.status);
+            var resp = xhr.responseText;
+            // var payments = JSON.parse(resp);
+            callback(null, resp);
+        } else {
+            callback('Error: ' + xhr.status);
+        }
+    }
+    xhr.send();
+    // console.log(xhr.status ' = request successfully sent'); // 0
+}
+
+function toDB(url, methodType, data, callback) { // could be POST / PUT
+    var xhr = new XMLHttpRequest();
+
+    xhr.open(methodType, url, true);
+    xhr.setRequestHeader('Content-type', 'application/json');
+
+    xhr.onload = function() {
+        console.log(xhr.status);
+        var resp = xhr.responseText;
+        callback(null, resp);
+    }
+    xhr.send(JSON.stringify(data));
+}
+
+//---------------- CUSTOM FETCH W/ PROMISES LIBRARY (OR IT COULD BE, TO BE EXACT) -----------------
+
+function get(url) {
+    return new Promise((resolve, reject) => {
+      fetch(url)
+        .then(res => res.json())
+        .then(data => resolve(data))
+        .catch(err => reject(err));
+    });
+}
+
 //---------------- CALLBACK BUTTON -----------------
 
 function callbackBtn() {
-    const xhr = new XMLHttpRequest();
-
-    xhr.open('GET', 'http://localhost:3000/payments', true);
-
-    xhr.onload = function() {
-        if(this.status === 200) {
-             // an array of objects
-            const payments = JSON.parse(this.responseText);
-
-             // descending sort of objects' "amounts" in an array
-            let paymentAmaunts = payments.sort(function (p1, p2){
-                return p2.amount - p1.amount;
-            });
-
-             // an array of 20 objects with the highest "amount"
-            var highestTwentyAmounts = paymentAmaunts.slice(0, 20);
-
-             // init a var for innerHtML
-            var output = '';
-
-             // display all of the 20 highest payments in UI
-            highestTwentyAmounts.forEach(payment => {
-                output += `
-                    <tr class="tr">                    
-                        <td class="td-id">${payment.id}</td>
-                        <td class="td-method">${payment.method}</td>
-                        <td class="td-amount">${payment.amount} ${ payment.currency}</td>
-                        <td class="td-date">${payment.created}</td>
-                        <td class="td-status">${payment.status}</td>
-                        <td class="td-merchant">${payment.merchant}</td>
-                    </tr>  
-                `;
-            });
-            document.querySelector('.tbody').innerHTML = output;
-        } 
-    }
-    xhr.onerror = function(){
-        alert(this.responseText);
-    }
-    xhr.send();
+    var url = "http://localhost:3000/payments";
+    var methodType = "GET";
+    
+    fromDB(url, methodType, function(error, resp) {
+        if(error) {
+            console.log(error);
+        } else {
+            // an array of objects
+        const payments = JSON.parse(resp);
+            // descending sort of objects' "amounts" in an array
+        let paymentAmaunts = payments.sort(function (p1, p2){
+            return p2.amount - p1.amount;
+        });
+    
+            // an array of 20 objects with the highest "amount"
+        var highestTwentyAmounts = paymentAmaunts.slice(0, 20);
+    
+            // init a var for innerHtML
+        var output = '';
+    
+            // display all of the 20 highest payments in UI, convert amount from cents
+        highestTwentyAmounts.forEach(payment => {
+        output += `
+            <tr class="tr">                    
+                <td class="td-id">${payment.id}</td>
+                <td class="td-method">${payment.method}</td>
+                <td class="td-amount">${payment.amount / 100} ${ payment.currency}</td> 
+                <td class="td-date">${payment.created}</td>
+                <td class="td-status">${payment.status}</td>
+                <td class="td-merchant">${payment.merchant}</td>
+            </tr>  
+        `;
+        });
+        document.querySelector('.tbody').innerHTML = output;
+        }
+    });
 }
 
 //---------------- PROMISE BUTTON -----------------
 
 function promiseBtn() {
-    return new Promise(function(resolve, reject) {
-        fetch('http://localhost:3000/payments')
-            .then(res => res.json()) // returns a promise
-            .then(data => {
+    var url = 'http://localhost:3000/payments';
 
-                let output = ''; 
-        
-                // go through each payment
-                data.forEach(payment => {
-                    // if a merchant's name is "Ginger"
-                    if(payment.merchant === 'Ginger') {
-                        // display those payments in DOM
-                         output += `
-                            <tr class="tr">                    
-                                <td class="td-id">${payment.id}</td>
-                                <td class="td-method">${payment.method}</td>
-                                <td class="td-amount">${payment.amount} ${ payment.currency}</td>
-                                <td class="td-date">${payment.created}</td>
-                                <td class="td-status">${payment.status}</td>
-                                <td class="td-merchant">${payment.merchant}</td>
-                            </tr>  
-                        `;   
-                    }      
-                })         
-                document.querySelector('.tbody').innerHTML = output; 
-                return resolve(data); 
-            })
-            .catch(error => reject(console.log(error)));
-    })
+    get(url)
+        .then(data => {
+
+            let output = ''; 
+    
+            // go through each payment
+            data.forEach(payment => {
+                // if a merchant's name is "Ginger"
+                if(payment.merchant === 'Ginger') {
+                    // display those payments in DOM
+                        output += `
+                        <tr class="tr">                    
+                            <td class="td-id">${payment.id}</td>
+                            <td class="td-method">${payment.method}</td>
+                            <td class="td-amount">${payment.amount / 100} ${ payment.currency}</td>
+                            <td class="td-date">${payment.created}</td>
+                            <td class="td-status">${payment.status}</td>
+                            <td class="td-merchant">${payment.merchant}</td>
+                        </tr>  
+                    `;   
+                }      
+            })         
+            document.querySelector('.tbody').innerHTML = output; 
+        })
+        .catch(error => reject(console.log(error)));
 }
 
 //---------------- Filter Payment-Method (server) BUTTON -----------------
 
 function filterMethodServer() {
-    const xhr = new XMLHttpRequest();
+    var url = "http://localhost:3000/payments";
+    var methodType = "GET";
 
-    xhr.open('GET', 'http://localhost:3000/payments', true);
-
-    xhr.onload = function() {
-        if(this.status === 200) {
-            const payments = JSON.parse(this.responseText);
-
+    fromDB(url, methodType, function(error, resp) {
+        if(error) {
+            console.log(error);
+        } else {
+            // an array of objects
+           const payments = JSON.parse(resp);
             // get the selected method      
             var methodSelection = document.querySelector('.method-selection');
             var methodSelected = methodSelection.options[methodSelection.selectedIndex].text;
-
+    
             // check if a method has been selected
             if(methodSelected === 'Payment methods') {
                 alert('No payment has been selected.')
@@ -119,7 +160,7 @@ function filterMethodServer() {
                         <tr class="tr">                    
                             <td class="td-id">${payment.id}</td>
                             <td class="td-method">${payment.method}</td>
-                            <td class="td-amount">${payment.amount} ${ payment.currency}</td>
+                            <td class="td-amount">${payment.amount / 100} ${ payment.currency}</td>
                             <td class="td-date">${payment.created}</td>
                             <td class="td-status">${payment.status}</td>
                             <td class="td-merchant">${payment.merchant}</td>
@@ -128,12 +169,8 @@ function filterMethodServer() {
                 });
                 document.querySelector('.tbody').innerHTML = output;
             }
-        } 
-    }
-    xhr.onerror = function(){
-        alert(this.responseText);
-    }
-    xhr.send();
+        }
+    });
 }
 
 //---------------- Filter Payment-Method (client) BUTTON -----------------
@@ -184,11 +221,9 @@ function filterMethodClient() {
 //---------------- ADD PAYMENT > FORM > SEND BUTTON -----------------
 
 function sendForm(e) {
-    const xhr = new XMLHttpRequest();
+    var url = "http://localhost:3000/payments";
+    var methodType = "POST";
     
-    xhr.open('POST', 'http://localhost:3000/payments', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-
     // get the selected method  
     var methodSelection = document.querySelector('.form-method-selection');
     var methodSelected = methodSelection.options[methodSelection.selectedIndex].text;
@@ -198,7 +233,7 @@ function sendForm(e) {
     var currencySelected = currencySelection.options[currencySelection.selectedIndex].text;
 
     // get the the input data from the form
-    var data = JSON.stringify({
+    var data = {
     id: "", 
     method: methodSelected,
     amount: document.querySelector('.form-amount').value,
@@ -206,57 +241,49 @@ function sendForm(e) {
     created: new Date().toString(),
     status: "", // ?
     merchant: document.querySelector('.form-merchant').value
-    })     
-    // catch errors
-    xhr.onerror = function(){
-        // console.log(this.responseText);
-        showMessage('Oops! Something went wrong.');
-    }
-    xhr.send(data);
+    };
+
+    toDB(url, methodType, data, function(error, resp) {
+        if(error) {
+            console.log(error);
+            alert('Oops! Something went wrong.');
+        } else {
+            console.log(resp);
+            alert('Payment successfully sent!');
+        }
+    });
     e.preventDefault();
-    showMessage('Payment successfully sent!');
-}
-function showMessage(msg) {
-    document.querySelector('.modal-body').innerHTML = '';
-    output = `
-        <center><p>${msg}</p></center>
-    `;
-    document.querySelector('.modal-body').innerHTML = output; 
 }
 
 //---------------- SHOW ALL BUTTON -----------------
 
 function showAllPayments() {
-    const xhr = new XMLHttpRequest();
+    var url = "http://localhost:3000/payments";
+    var methodType = "GET";
 
-    xhr.open('GET', 'http://localhost:3000/payments', true);
-
-    xhr.onload = function() {
-        if(this.status === 200) {
-             // an array of objects
-            const payments = JSON.parse(this.responseText);
-
-             // init a var for innerHtML
-            var output = '';
-
-             // display all of the 20 highest payments in UI
-             payments.forEach(payment => {
-                output += `
-                    <tr class="tr">                    
-                        <td class="td-id">${payment.id}</td>
-                        <td class="td-method">${payment.method}</td>
-                        <td class="td-amount">${payment.amount} ${ payment.currency}</td>
-                        <td class="td-date">${payment.created}</td>
-                        <td class="td-status">${payment.status}</td>
-                        <td class="td-merchant">${payment.merchant}</td>
-                    </tr>  
-                `;
-            });
-            document.querySelector('.tbody').innerHTML = output;
-        } 
-    }
-    xhr.onerror = function(){
-        alert(this.responseText);
-    }
-    xhr.send();
+    fromDB(url, methodType, function(error, resp) {
+        if(error) {
+            console.log(error);
+        } else {
+            // an array of objects
+           const payments = JSON.parse(resp);
+            // init a var for innerHtML
+           var output = '';
+    
+            // display all of the 20 highest payments in UI
+            payments.forEach(payment => {
+               output += `
+                   <tr class="tr">                    
+                       <td class="td-id">${payment.id}</td>
+                       <td class="td-method">${payment.method}</td>
+                       <td class="td-amount">${payment.amount / 100} ${ payment.currency}</td>
+                       <td class="td-date">${payment.created}</td>
+                       <td class="td-status">${payment.status}</td>
+                       <td class="td-merchant">${payment.merchant}</td>
+                   </tr>  
+               `;
+           });
+           document.querySelector('.tbody').innerHTML = output;
+        }
+    });
 }
